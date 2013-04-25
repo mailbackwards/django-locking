@@ -20,9 +20,9 @@ class LockableAdmin(admin.ModelAdmin):
 
     class Media:
         js = (
-            _s.STATIC_URL + 'locking/js/jquery.url.packed.js',
-            _s.LOCKING_URL + "ajax/variables.js",
-            _s.STATIC_URL + "locking/js/admin.locking.js?v=1"
+            _s.STATIC_URL + 'locking/js/jquery.url.packed.js?v=2',
+            _s.LOCKING_URL + "ajax/variables.js?v=2",
+            _s.STATIC_URL + "locking/js/admin.locking.js?v=2"
         )
         css = {"all": (_s.STATIC_URL + 'locking/css/locking.css',)}
 
