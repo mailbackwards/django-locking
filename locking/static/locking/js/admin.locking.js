@@ -87,6 +87,7 @@ locking.error = function() {
             lock: base_url + "/lock/",
             unlock: base_url + "/unlock/"
         };
+                
         // Texts.
         var text = {
             warn: gettext('Your lock on this page expires in less than %s' +
