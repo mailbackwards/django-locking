@@ -56,8 +56,8 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
         return;
     };
 
-    var LockManager = function(notificationElement) {
-        this.$notificationElement = $(notificationElement);
+    var LockManager = function(lockStatus) {
+        this.$lockStatus = $(lockStatus);
         this.config = DJANGO_LOCKING.config || {};
         this.urls = this.config.urls || {};
 
@@ -192,18 +192,19 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             this.isDisabled = true;
             this.lockingSupport = false;
             data = data || {};
+            var locked_by_user = 'Locked by ' + data['locked_by_name']
             if (this.lockOwner && this.lockOwner == (this.currentUser || data.current_user)) {
                 var msg;
                 if (data.locked_by) {
                     msg = data.locked_by + " removed your lock.";
-                    this.updateNotification(this.text.lock_removed, data);
+                    this.updateStatus(locked_by_user, this.text.lock_removed, data);
                 } else {
                     msg = "You lost your lock.";
-                    this.updateNotification(this.text.has_expired, data);
+                    this.updateStatus(locked_by_user, this.text.has_expired, data);
                 }
                 alert(msg);
             } else {
-                this.updateNotification(this.text.is_locked, data);
+                this.updateStatus(locked_by_user, this.text.is_locked, data);
             }
             $(":input[disabled]").addClass('_locking_initially_disabled');
             $(":input:not(.django-select2, .django-ckeditor-textarea)").attr("disabled", "disabled");
@@ -295,10 +296,18 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             var regex = new RegExp("\/0\/" + action + "\/$");
             return baseUrl.replace(regex, "/" + id + "/" + action + "/");
         },
-        updateNotification: function(text, data) {
+        updateStatus: function(message, text, data) {
             $('html, body').scrollTop(0);
             text = interpolate(text, data, true);
-            this.$notificationElement.html(text).hide().fadeIn('slow');
+            var $elem = this.$lockStatus
+            $elem.off('click').hide()
+            switch (message) {
+                default:
+                    $elem.attr('class', 'btn btn-danger');
+                    break;
+            }
+            $elem.attr('title', text).html('<i class="icon-lock"></i> '+message)
+            $elem.fadeIn('slow');
         },
         // Locking toggle function
         removeLockOnClick: function(e) {
@@ -335,9 +344,10 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
     };
 
     $(document).ready(function() {
-        var $target = $("#content-inner, #content").eq(0);
-        var $notificationElement = $('<div id="locking_notification"></div>').prependTo($target);
-        $notificationElement.djangoLocking();
+        var $target = $('#actions-right-alt')
+        var lockingTag = '<a class="btn" href="#"><i class="icon-lock"></i> Locking</a>'
+        var $lockingStatus = $(lockingTag).prependTo($target);
+        $lockingStatus.djangoLocking();
     });
 
 })((typeof grp == 'object' && grp.jQuery)
