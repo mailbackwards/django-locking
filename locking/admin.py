@@ -11,10 +11,10 @@ from django import forms
 from django.core.urlresolvers import reverse
 from django.utils import html as html_utils
 from django.utils.functional import curry
-from django.utils.timesince import timeuntil
 from django.utils.translation import ugettext as _
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.admin.templatetags.admin_static import static as admin_static
 
 try:
     from django.template.response import TemplateResponse
@@ -38,10 +38,10 @@ class LockableAdminMixin(object):
     def media(self):
         return super(LockableAdminMixin, self).media + forms.Media(**{
             'js': (
-                locking_settings.STATIC_URL + "locking/js/admin.locking.js?v=6",
+                admin_static('locking/js/admin.locking.js'),
             ),
             'css': {
-                'all': (locking_settings.STATIC_URL + 'locking/css/locking.css',),
+                'all': (admin_static('locking/css/locking.css'),),
             }})
 
     def locking_media(self, obj=None):
