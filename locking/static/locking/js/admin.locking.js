@@ -312,6 +312,8 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             return baseUrl.replace(regex, "/" + id + "/" + action + "/");
         },
         updateStatus: function(message, text, data) {
+            var self = this;
+
             $('html, body').scrollTop(0);
             text = interpolate(text, data, true);
             var $elem = this.$lockStatus
@@ -319,35 +321,66 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             switch (message) {
                 case 'Locked by you':
                     $elem.attr('class', 'btn btn-success');
+                    $elem.on('click', function(e) {self.enableReadonlyOnClick(e)});
                     break;
                 case 'Read-only':
-                    $elem.attr('class', 'btn btn-success');
+                    $elem.attr('class', 'btn btn-warning');
+                    $elem.on('click', function(e) {self.reloadPage($elem)});
                     break;
                 default:
                     $elem.attr('class', 'btn btn-danger');
+                    $elem.on('click', function(e) {self.removeLockOnClick(e)})
                     break;
             }
             $elem.attr('title', text).html('<i class="icon-lock"></i> '+message)
             $elem.fadeIn('slow');
         },
+        reloadPage: function(elem) {
+            $(elem).html('<i class="icon-lock"></i> Reloading...');
+            window.location.reload(true)
+        },
+        enableReadonlyOnClick: function(e) {
+            e.preventDefault();
+            var self = this;
+            $.ajax({
+                url: this.urls.lock_clear,
+                async: false,
+                success: function() {
+                    var data = {'isReadonly': true};
+                    self.disableForm(data);
+                }
+            });
+        },
         // Locking toggle function
         removeLockOnClick: function(e) {
+            var self = this;
             e.preventDefault();
             var $link = $(e.target);
-            if (!$link.hasClass('locking-locked')) {
-                return;
+            if (self.objId === '0') {
+                // it's coming from the list view
+                if (!$link.hasClass('locking-locked')) {
+                    return;
+                }
+                var user = $link.attr('data-locked-by');
+                var lockedObjId = $link.attr('data-locked-obj-id');
+            } else {
+                // grab the username from the button text
+                var user = $link.text().substr(11);
+                var lockedObjId = self.objId;
             }
-            var user = $link.attr('data-locked-by');
-            var lockedObjId = $link.attr('data-locked-obj-id');
             var removeLockUrl = this.getUrl("lock_remove", lockedObjId);
             if (removeLockUrl) {
-                if (confirm("User '" + user + "' is currently editing this " +
-                            "content. Proceed with lock removal?")) {
+                if (confirm("User '" + user + "' currently has a lock on this " +
+                            "content. Do you want to force it to unlock?")) {
                     $.ajax({
                         url: removeLockUrl,
                         async: false,
                         success: function() {
-                            $link.hide();
+                            if (self.objId === '0') {
+                                $link.hide();
+                            } else {
+                                self.reloadPage($link)
+                            }
                         }
                     });
                 }
