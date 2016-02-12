@@ -199,7 +199,10 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             this.lockingSupport = false;
             data = data || {};
             var locked_by_user = 'Locked by ' + data['locked_by_name']
-            if (this.lockOwner && this.lockOwner == (this.currentUser || data.current_user)) {
+            if (data.isReadonly) {
+                this.isReadonly = true;
+                this.updateStatus('Read-only', this.text.is_readonly, data);
+            } else if (this.lockOwner && this.lockOwner == (this.currentUser || data.current_user)) {
                 var msg;
                 if (data.locked_by) {
                     msg = data.locked_by + " removed your lock.";
@@ -235,15 +238,19 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                          'your attempts may be thwarted due to another lock ' +
                          ' or you may have stale data.',
             prompt_save: 'Do you wish to save the page?',
+            is_readonly: 'This page is in read-only mode. ' +
+                         'You cannot make any changes.'
             is_locked_by_you: 'You have opened this page in edit mode. ' +
-                         'Only you can make changes.'
+                         'Only you can make changes.  To allow others to edit, ' +
+                         'click here to enable read-only mode.'
         },
         lockOwner: null,
         currentUser: null,
         refreshTimeout: null,
         lockingSupport: true,  // false for changelist views and new objects
+        isReadonly: false,
         refreshLock: function() {
-            if (!this.urls.lock) {
+            if (this.isReadonly || !this.urls.lock) {
                 return;
             }
             var self = this;
@@ -311,6 +318,9 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             $elem.off('click').hide()
             switch (message) {
                 case 'Locked by you':
+                    $elem.attr('class', 'btn btn-success');
+                    break;
+                case 'Read-only':
                     $elem.attr('class', 'btn btn-success');
                     break;
                 default:
