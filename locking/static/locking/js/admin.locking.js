@@ -60,6 +60,8 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
         this.$lockStatus = $(lockStatus);
         this.config = DJANGO_LOCKING.config || {};
         this.urls = this.config.urls || {};
+        // Grab the object's ID from its url. If it's 0, we're on the list view
+        this.objId = this.urls.lock_remove.split('/')[4];
 
         for (var key in this.text) {
             if (typeof gettext == 'function') {
@@ -99,6 +101,10 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             self.onLinkClick(evt);
         });
 
+        // Default to locking the page
+        if (this.objId != '0') {
+            this.updateStatus('Locked by you', this.text.is_locked_by_you, '')
+        }
         this.refreshLock();
     };
 
@@ -228,7 +234,9 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             has_expired: 'You have lost your lock on this page. If you save, ' +
                          'your attempts may be thwarted due to another lock ' +
                          ' or you may have stale data.',
-            prompt_save: 'Do you wish to save the page?'
+            prompt_save: 'Do you wish to save the page?',
+            is_locked_by_you: 'You have opened this page in edit mode. ' +
+                         'Only you can make changes.'
         },
         lockOwner: null,
         currentUser: null,
@@ -302,6 +310,9 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             var $elem = this.$lockStatus
             $elem.off('click').hide()
             switch (message) {
+                case 'Locked by you':
+                    $elem.attr('class', 'btn btn-success');
+                    break;
                 default:
                     $elem.attr('class', 'btn btn-danger');
                     break;
