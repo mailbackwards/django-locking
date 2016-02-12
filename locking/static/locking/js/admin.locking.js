@@ -84,7 +84,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             if (!self.lockingSupport) {
                 return;
             }
-            
+
             $.ajax({
                 url: self.urls.lock_clear,
                 async: false,
@@ -98,7 +98,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
         $('a').bindFirst('click', function(evt) {
             self.onLinkClick(evt);
         });
-        
+
         this.refreshLock();
     };
 
@@ -128,32 +128,46 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                 return false;
             }
         },
-        toggleCKEditorReadonly: function(isReadOnly) {
-            var toggleEditor = function(editor) {
-                if (editor.status == 'ready' || editor.status == 'basic_ready') {
-                    editor.setReadOnly(isReadOnly);
-                } else {
-                    editor.on('contentDom', function(e) {
-                        e.editor.setReadOnly(isReadOnly);
-                    });
-                }
-            };
+        toggleEditorReadonly: function(isReadOnly) {
+            // Check for CKEditor, then tinyMCE
             if (window.CKEDITOR !== undefined) {
+                var toggleCKEditor = function(editor) {
+                    if (editor.status == 'ready' || editor.status == 'basic_ready') {
+                        editor.setReadOnly(isReadOnly);
+                    } else {
+                        editor.on('contentDom', function(e) {
+                            e.editor.setReadOnly(isReadOnly);
+                        });
+                    }
+                };
                 switch (CKEDITOR.status) {
                     case 'basic_ready':
                     case 'ready':
                     case 'loaded':
                     case 'basic_loaded':
                         for (var instanceId in CKEDITOR.instances) {
-                            toggleEditor(CKEDITOR.instances[instanceId]);
+                            toggleCKEditor(CKEDITOR.instances[instanceId]);
                         }
                         break;
                     default:
                         CKEDITOR.on("instanceReady", function(e) {
-                            toggleEditor(e.editor);
+                            toggleCKEditor(e.editor);
                         });
                         break;
                 }
+            }
+            if (window.tinyMCE !== undefined) {
+                // Disable contentEditable for current editors
+                $.each(tinyMCE.editors, function() {
+                    var contentEditable = (!isReadOnly).toString();
+                    if (this.getBody !== undefined) {
+                        this.getBody().setAttribute('contenteditable', contentEditable);
+                    }
+                });
+                // Make sure future editors are set to readonly
+                tinyMCE.onAddEditor.add(function(mgr, editor) {
+                    editor.settings.readonly = isReadOnly;
+                });
             }
         },
         enableForm: function() {
@@ -164,7 +178,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             $(":input:not(.django-select2, .django-ckeditor-textarea)").not('._locking_initially_disabled').removeAttr("disabled");
             $("body").removeClass("is-locked");
 
-            this.toggleCKEditorReadonly(false);
+            this.toggleEditorReadonly(false);
 
             if (typeof $.fn.select2 === "function") {
                 $('.django-select2').select2("enable", true);
@@ -195,7 +209,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             $(":input:not(.django-select2, .django-ckeditor-textarea)").attr("disabled", "disabled");
             $("body").addClass("is-locked");
 
-            this.toggleCKEditorReadonly(true);
+            this.toggleEditorReadonly(true);
 
             if (typeof $.fn.select2 === "function") {
                 $('.django-select2').select2("enable", false);
