@@ -174,8 +174,6 @@ class LockableAdminMixin(object):
             if not lock.is_locked:
                 return u""
 
-        until = timeuntil(lock.lock_expiration_time)
-
         locked_by_name = lock.locked_by.get_full_name()
         if locked_by_name:
             locked_by_name = u"%(username)s (%(fullname)s)" % {
@@ -186,10 +184,10 @@ class LockableAdminMixin(object):
             locked_by_name = lock.locked_by.username
 
         if lock.locked_by.pk == current_user_id:
-            msg = _(u"You own this lock for %s longer") %  until
+            msg = _(u'You own this lock. Close out of the item to unlock it')
             css_class = 'locking-edit'
         else:
-            msg = _(u"Locked by %s for %s longer") % (until, locked_by_name)
+            msg = _(u'Locked by %s. Click here to force it to unlock' % locked_by_name)
             css_class = 'locking-locked'
 
         return (
