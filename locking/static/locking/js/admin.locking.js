@@ -227,21 +227,17 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             $(document).trigger('locking:disabled');
         },
         text: {
-            warn:        'Your lock on this page expires in less than %s ' +
-                         'minutes. Press save or <a href="">reload the page</a>.',
             lock_removed: 'User "%(locked_by_name)s" removed your lock. If you save, ' +
-                         'your attempts may be thwarted due to another lock ' +
-                         ' or you may have stale data.',
-            is_locked:   'This page is locked by <em>%(locked_by_name)s</em> ' +
-                         'and editing is disabled.',
+                         'you or %(locked_by_name)s may lose data. Beware! Coordinate!',
+            is_locked:   'This page is locked by %(locked_by_name)s ' +
+                         'and editing is disabled. To force it to unlock, click here.',
             has_expired: 'You have lost your lock on this page. If you save, ' +
-                         'your attempts may be thwarted due to another lock ' +
-                         ' or you may have stale data.',
-            prompt_save: 'Do you wish to save the page?',
+                         'you or another writer may lose data. Beware!',
             is_readonly: 'This page is in read-only mode. ' +
-                         'You cannot make any changes.'
+                         'You cannot make any changes. To switch to edit mode, ' +
+                         'click here to refresh the page.',
             is_locked_by_you: 'You have opened this page in edit mode. ' +
-                         'Only you can make changes.  To allow others to edit, ' +
+                         'Only you can make changes. To allow others to edit, ' +
                          'click here to enable read-only mode.'
         },
         lockOwner: null,
