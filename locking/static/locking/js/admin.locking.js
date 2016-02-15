@@ -61,7 +61,13 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
         this.config = DJANGO_LOCKING.config || {};
         this.urls = this.config.urls || {};
         // Grab the object's ID from its url. If it's 0, we're on the list view
-        this.objId = this.urls.lock_remove.split('/')[4];
+        if (this.urls.lock_remove === undefined) {
+            // it's a new object
+            this.$lockStatus.hide();
+            this.objId = '0';
+        } else {
+            this.objId = this.urls.lock_remove.split('/')[4];
+        }
 
         for (var key in this.text) {
             if (typeof gettext == 'function') {
