@@ -1,6 +1,7 @@
 from django.conf import settings
 
 
+LOCKING_ENABLED = getattr(settings, 'LOCKING_ENABLED', True)
 LOCKING_URL = getattr(settings, 'LOCKING_URL', '/locking/')
 STATIC_URL = getattr(settings, 'STATIC_URL', '/static/')
 

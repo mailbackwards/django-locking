@@ -205,5 +205,11 @@ class LockableAdminMixin(object):
     get_lock_for_admin.short_description = 'Lock'
 
 
-class LockableAdmin(LockableAdminMixin, admin.ModelAdmin):
-    pass
+if locking_settings.LOCKING_ENABLED:
+    class LockableAdmin(LockableAdminMixin, admin.ModelAdmin):
+        def get_list_display(self, request):
+            return super(LockableAdmin, self).get_list_display(request) + ('get_lock_for_admin',)
+else:
+    # We don't want a lock; just make a generic ModelAdmin class
+    class LockableAdmin(admin.ModelAdmin):
+        pass
