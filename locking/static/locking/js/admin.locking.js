@@ -141,7 +141,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             }
         },
         toggleEditorReadonly: function(isReadOnly) {
-            // Check for CKEditor, then tinyMCE
+            // Check for CKEditor, then tinyMCE, then CodeMirror
             if (window.CKEDITOR !== undefined) {
                 var toggleCKEditor = function(editor) {
                     if (editor.status == 'ready' || editor.status == 'basic_ready') {
@@ -179,6 +179,15 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                 // Make sure future editors are set to readonly
                 tinyMCE.onAddEditor.add(function(mgr, editor) {
                     editor.settings.readonly = isReadOnly;
+                });
+            }
+            // now check for CodeMirror
+            if (window.CodeMirror !== undefined) {
+                $.each($('.CodeMirror'), function() {
+                    var editor = this.CodeMirror;
+                    if (editor !== undefined) {
+                        editor.doc.cm.options['readOnly'] = isReadOnly;
+                    }
                 });
             }
         },
