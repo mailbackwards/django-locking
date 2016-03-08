@@ -208,7 +208,13 @@ class LockableAdminMixin(object):
 if locking_settings.LOCKING_ENABLED:
     class LockableAdmin(LockableAdminMixin, admin.ModelAdmin):
         def get_list_display(self, request):
-            return super(LockableAdmin, self).get_list_display(request) + ('get_lock_for_admin',)
+            """Add the lock column to the right of the model's list display."""
+            list_display = super(LockableAdmin, self).get_list_display(request)
+            try:
+                return list_display + ('get_lock_for_admin',)
+            except TypeError:
+                # it's a list
+                return list_display + ['get_lock_for_admin']
 else:
     # We don't want a lock; just make a generic ModelAdmin class
     class LockableAdmin(admin.ModelAdmin):
