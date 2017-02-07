@@ -185,21 +185,21 @@ class LockableAdminMixin(object):
 
         if lock.locked_by.pk == current_user_id:
             msg = _(u'You own this lock. Close out of the item to unlock it')
-            css_class = 'locking-edit'
+            character = '&#x270D;'
         else:
             msg = _(u'Locked by %s. Click here to force it to unlock' % locked_by_name)
-            css_class = 'locking-locked'
+            character = '&#128274;'
 
         return (
             u'  <a href="#" title="%(msg)s"'
             u'     data-locked-obj-id="%(locked_obj_id)s"'
             u'     data-locked-by="%(locked_by_name)s"'
-            u'     class="locking-status %(css_class)s"></a>'
+            u'     class="locking-status">%(character)s</a>'
         ) % {
             'msg': html_utils.escape(msg),
             'locked_obj_id': obj.pk,
             'locked_by_name': html_utils.escape(locked_by_name),
-            'css_class': css_class,}
+            'character': character,}
 
     get_lock_for_admin.allow_tags = True
     get_lock_for_admin.short_description = 'Lock'
