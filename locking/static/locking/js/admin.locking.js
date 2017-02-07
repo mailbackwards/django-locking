@@ -60,13 +60,11 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
         this.$lockStatus = $(lockStatus);
         this.config = DJANGO_LOCKING.config || {};
         this.urls = this.config.urls || {};
-        // Grab the object's ID from its url. If it's 0, we're on the list view
-        if (this.urls.lock_remove === undefined) {
-            // it's a new object
+        // Grab the object's ID from its url.
+        // If it's 0, we're in the list view. If it's undefined, we're in the add view.
+        this.objId = this.urls.lock_remove === undefined ? '0' : this.urls.lock_remove.split('/')[4];
+        if (this.objId === '0') {
             this.$lockStatus.hide();
-            this.objId = '0';
-        } else {
-            this.objId = this.urls.lock_remove.split('/')[4];
         }
 
         for (var key in this.text) {
@@ -130,7 +128,9 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                 'delete-link',
                 'remove-handler', 'grp-remove-handler',
                 'arrow-up-handler', 'grp-arrow-up-handler',
-                'arrow-down-handler', 'grp-arrow-down-handler'
+                'arrow-down-handler', 'grp-arrow-down-handler',
+                'vDateField-link', 'vTimeField-link',
+                'related-lookup'
             ]);
             if (isHandler) {
                 e.stopPropagation();
@@ -331,23 +331,23 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             $elem.off('click').hide()
             switch (message) {
                 case 'Locked by you':
-                    $elem.attr('class', 'btn btn-success');
                     $elem.on('click', function(e) {self.enableReadonlyOnClick(e)});
                     break;
                 case 'Read-only':
-                    $elem.attr('class', 'btn btn-warning');
                     $elem.on('click', function(e) {self.reloadPage($elem)});
                     break;
                 default:
-                    $elem.attr('class', 'btn btn-danger');
                     $elem.on('click', function(e) {self.removeLockOnClick(e)})
                     break;
             }
-            $elem.attr('title', text).html('<i class="icon-lock"></i> '+message)
-            $elem.fadeIn('slow');
+            $elem.attr('title', text)
+                 .attr('class', 'default')
+                 .html('&#128274; ' + message)
+                 .wrap('<li></li>')
+                 .fadeIn('slow');
         },
         reloadPage: function(elem) {
-            $(elem).html('<i class="icon-lock"></i> Reloading...');
+            $(elem).html('&#128274; Reloading...');
             window.location.reload(true)
         },
         enableReadonlyOnClick: function(e) {
@@ -409,10 +409,9 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
     };
 
     $(document).ready(function() {
-        var $target = $('#actions-right-alt')
-        var lockingTag = '<a class="btn" href="#"><i class="icon-lock"></i> Locking</a>'
-        var $lockingStatus = $(lockingTag).prependTo($target);
-        $lockingStatus.djangoLocking();
+        var $target = $('ul.object-tools:first');
+        var $lockingTag = $('<a class="btn" href="#">&#128274; Locking</a>');
+        $lockingTag.prependTo($target).djangoLocking();
     });
 
 })((typeof grp == 'object' && grp.jQuery)
