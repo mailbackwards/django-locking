@@ -49,7 +49,7 @@ class LockableAdminMixin(object):
         info = (opts.app_label, getattr(opts, 'model_name', None) or getattr(opts, 'module_name', None))
         pk = getattr(obj, 'pk', None) or 0
         return forms.Media(js=(
-            reverse('admin:%s_%s_lock_js' % info, args=[pk]),))
+            reverse('admin:%s_%s_lock_js' % info, args=[pk], current_app=self.admin_site.name),))
 
     def get_urls(self):
         """
