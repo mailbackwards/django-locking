@@ -120,16 +120,20 @@ def lock_status(model_admin, request, object_id, extra_context=None, **kwargs):
 def locking_js(model_admin, request, object_id, extra_context=None):
     opts = model_admin.model._meta
     info = (opts.app_label, opts.object_name.lower())
+    kwargs = {
+        'args': [object_id],
+        'current_app': model_admin.admin_site.name
+    }
 
     locking_urls = {
-        "lock_remove": reverse("admin:%s_%s_lock_remove" % info, args=[object_id]),
+        "lock_remove": reverse("admin:%s_%s_lock_remove" % info, **kwargs),
     }
 
     if object_id and object_id != '0':
         locking_urls.update({
-            "lock": reverse("admin:%s_%s_lock" % info, args=[object_id]),
-            "lock_clear":  reverse("admin:%s_%s_lock_clear" % info, args=[object_id]),
-            "lock_status": reverse("admin:%s_%s_lock_status" % info, args=[object_id]),        
+            "lock": reverse("admin:%s_%s_lock" % info, **kwargs),
+            "lock_clear": reverse("admin:%s_%s_lock_clear" % info, **kwargs),
+            "lock_status": reverse("admin:%s_%s_lock_status" % info, **kwargs),
         })
 
     js_vars = {
