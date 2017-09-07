@@ -447,8 +447,8 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
           background: '#539bae',
           color: '#FFF',
           display: 'block',
-          float: 'left',
           'margin-bottom': '20px',
+          'max-width': '130px',
           padding: '10px'
         });
 
