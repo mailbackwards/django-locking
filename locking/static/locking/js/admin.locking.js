@@ -439,20 +439,27 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
     };
 
     $(document).ready(function() {
-        var $target = $('#content');
+        var $target;
         var $lockingTag = $('<a class="btn" href="#">&#128274; Locking</a>');
-
-        $target.css('list-style', 'none');
-        $lockingTag.css({
+        var $preferredTarget = $('ul.object-tools:first');
+        var styles = {
           background: '#539bae',
           color: '#FFF',
           display: 'block',
           'margin-bottom': '20px',
-          'max-width': '130px',
-          padding: '10px',
           'text-align': 'center'
-        });
+        };
 
+        if ($preferredTarget.length > 0) {
+          $target = $preferredTarget;
+        } else {
+          $target = $('#content');
+          styles['max-width'] = '130px';
+          styles['padding'] = '10px';
+        }
+
+        $target.css('list-style', 'none');
+        $lockingTag.css(styles);
         $lockingTag.prependTo($target).djangoLocking();
     });
 
