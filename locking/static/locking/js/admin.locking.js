@@ -171,6 +171,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
           });
         },
         toggleEditorReadonly: function(isReadOnly) {
+            // disable form buttons
             var buttonPollInterval = setInterval(function() {
               if (this.modalButtonsExist()) {
                 clearInterval(buttonPollInterval);
@@ -180,7 +181,9 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                 var saveButton = this.parentDoc.querySelector(saveButtonSelector);
 
                 deleteButton.setAttribute('disabled', true);
+                deleteButton.style.pointerEvents = 'none';
                 saveButton.setAttribute('disabled', true);
+                saveButton.style.pointerEvents = 'none';
               }
             }.bind(this), 250);
 
