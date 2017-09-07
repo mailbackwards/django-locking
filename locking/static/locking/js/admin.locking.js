@@ -60,6 +60,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
         this.$lockStatus = $(lockStatus);
         this.config = DJANGO_LOCKING.config || {};
         this.urls = this.config.urls || {};
+        this.parentDoc = window.parent.document;
         // Grab the object's ID from its url.
         // If it's 0, we're in the list view. If it's undefined, we're in the add view.
         this.objId = this.urls.lock_remove === undefined ? '0' : this.urls.lock_remove.split('/')[4];
@@ -123,21 +124,20 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                 return false;
             }
         },
-        modalButtonsExist: function(parentDoc) {
-          var els = parentDoc.querySelectorAll('.cms-modal-buttons .cms-btn');
+        modalButtonsExist: function() {
+          var els = this.parentDoc.querySelectorAll('.cms-modal-buttons .cms-btn');
           return els.length > 0;
         },
         bindLockOnCloseEvents: function() {
           var boundLockOnClose = this.lockOnClose.bind(this);
-          var parentDoc = window.parent.document;
           var cancelButtonSelector = '.cms-modal-buttons .cms-modal-item-buttons:last-of-type .cms-btn';
 
           var buttonPollInterval = setInterval(function() {
-            if (this.modalButtonsExist(parentDoc)) {
+            if (this.modalButtonsExist()) {
               clearInterval(buttonPollInterval);
 
-              var cancelButton = parentDoc.querySelector(cancelButtonSelector);
-              var closeButton = parentDoc.querySelector('.cms-modal-close');
+              var cancelButton = this.parentDoc.querySelector(cancelButtonSelector);
+              var closeButton = this.parentDoc.querySelector('.cms-modal-close');
 
               cancelButton.addEventListener('mouseup', function(e) {
                 boundLockOnClose();
@@ -171,6 +171,19 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
           });
         },
         toggleEditorReadonly: function(isReadOnly) {
+            var buttonPollInterval = setInterval(function() {
+              if (this.modalButtonsExist()) {
+                clearInterval(buttonPollInterval);
+                var deleteButtonSelector = '.cms-modal-buttons .cms-modal-item-buttons:nth-of-type(2) .cms-btn';
+                var saveButtonSelector = '.cms-modal-buttons .cms-modal-item-buttons:first-of-type .cms-btn';
+                var deleteButton = this.parentDoc.querySelector(deleteButtonSelector);
+                var saveButton = this.parentDoc.querySelector(saveButtonSelector);
+
+                deleteButton.setAttribute('disabled', true);
+                saveButton.setAttribute('disabled', true);
+              }
+            }.bind(this), 250);
+
             // Check for CKEditor, then tinyMCE, then CodeMirror
             if (window.CKEDITOR !== undefined) {
                 var toggleCKEditor = function(editor) {
