@@ -441,6 +441,17 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
     $(document).ready(function() {
         var $target = $('#content');
         var $lockingTag = $('<a class="btn" href="#">&#128274; Locking</a>');
+
+        $target.css('list-style', 'none');
+        $lockingTag.css({
+          background: '#539bae',
+          color: '#FFF',
+          display: 'block',
+          float: 'left',
+          'margin-bottom': '20px',
+          padding: '10px'
+        });
+
         $lockingTag.prependTo($target).djangoLocking();
     });
 
