@@ -449,7 +449,8 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
           display: 'block',
           'margin-bottom': '20px',
           'max-width': '130px',
-          padding: '10px'
+          padding: '10px',
+          'text-align': 'center'
         });
 
         $lockingTag.prependTo($target).djangoLocking();
