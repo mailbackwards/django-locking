@@ -73,34 +73,17 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
             }
         }
 
+        this.bindLockOnCloseEvents();
+
         var self = this;
         $(document).on('click', 'a.locking-status', function(e) {
             return self.removeLockOnClick(e);
         });
 
-        // Disable lock when you leave
-        $(window).on('beforeunload', function() {
-
-            // We have to assure that our lock_clear request actually
-            // gets through before the user leaves the page, so it
-            // shouldn't run asynchronously.
-            if (!self.urls.lock_clear) {
-                return;
-            }
-            if (!self.lockingSupport) {
-                return;
-            }
-
-            $.ajax({
-                url: self.urls.lock_clear,
-                async: false,
-                cache: false
-            });
-
-        });
         $(document).on('click', 'a', function(evt) {
             return self.onLinkClick(evt);
         });
+
         $('a').bindFirst('click', function(evt) {
             self.onLinkClick(evt);
         });
@@ -139,6 +122,55 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                 e.returnValue = false;
                 return false;
             }
+        },
+        modalButtonsExist: function(parentDoc) {
+          var els = parentDoc.querySelectorAll('.cms-modal-buttons .cms-btn');
+          return els.length > 0;
+        },
+        bindLockOnCloseEvents: function() {
+          var boundLockOnClose = this.lockOnClose.bind(this);
+          var parentDoc = window.parent.document;
+          var cancelButtonSelector = '.cms-modal-buttons .cms-modal-item-buttons:last-of-type .cms-btn';
+
+          var buttonPollInterval = setInterval(function() {
+            if (this.modalButtonsExist(parentDoc)) {
+              clearInterval(buttonPollInterval);
+
+              var cancelButton = parentDoc.querySelector(cancelButtonSelector);
+              var closeButton = parentDoc.querySelector('.cms-modal-close');
+
+              cancelButton.addEventListener('mouseup', function(e) {
+                boundLockOnClose();
+              });
+
+              closeButton.addEventListener('mouseup', function() {
+                boundLockOnClose();
+              });
+            }
+          }.bind(this), 250);
+
+          $(window).on('beforeunload', function() {
+            boundLockOnClose();
+          });
+        },
+        lockOnClose: function() {
+          // We have to assure that our lock_clear request actually
+          // gets through before the user leaves the page, so it
+          // shouldn't run asynchronously.
+          if (!this.urls.lock_clear) {
+              return;
+          }
+          if (!this.lockingSupport) {
+              return;
+          }
+
+          console.log('foo');
+
+          $.ajax({
+              url: this.urls.lock_clear,
+              async: false,
+              cache: false
+          });
         },
         toggleEditorReadonly: function(isReadOnly) {
             // Check for CKEditor, then tinyMCE, then CodeMirror
@@ -409,7 +441,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
     };
 
     $(document).ready(function() {
-        var $target = $('ul.object-tools:first');
+        var $target = $('#content');
         var $lockingTag = $('<a class="btn" href="#">&#128274; Locking</a>');
         $lockingTag.prependTo($target).djangoLocking();
     });
