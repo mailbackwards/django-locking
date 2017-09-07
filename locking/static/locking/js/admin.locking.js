@@ -164,8 +164,6 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
               return;
           }
 
-          console.log('foo');
-
           $.ajax({
               url: this.urls.lock_clear,
               async: false,
