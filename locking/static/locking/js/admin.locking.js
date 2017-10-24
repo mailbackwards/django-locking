@@ -98,6 +98,21 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
 
     $.extend(LockManager.prototype, {
         isDisabled: false,
+        localStorageKey: 'djangoLocking',
+        clearLocalStorage: function() {
+          if (this.lockPk) {
+            var locLockInfo = localStorage.getItem(this.localStorageKey);
+
+            if (locLockInfo) {
+              var lockObj = JSON.parse(locLockInfo);
+
+              if (lockObj[this.lockPk] && lockObj[this.lockPk] === true) {
+                delete lockObj[this.lockPk];
+                localStorage.setItem(this.localStorageKey, JSON.stringify(lockObj));
+              }
+            }
+          }
+        },
         onLinkClick: function(e) {
             var self = this;
             $a = $(e.target);
@@ -130,6 +145,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
         },
         bindLockOnCloseEvents: function() {
           var boundLockOnClose = this.lockOnClose.bind(this);
+          var boundClearLocalStorage = this.clearLocalStorage.bind(this);
           var cancelButtonSelector = '.cms-modal-buttons .cms-modal-item-buttons:last-of-type .cms-btn';
 
           var buttonPollInterval = setInterval(function() {
@@ -141,16 +157,19 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
 
               cancelButton.addEventListener('mouseup', function(e) {
                 boundLockOnClose();
+                boundClearLocalStorage();
               });
 
               closeButton.addEventListener('mouseup', function() {
                 boundLockOnClose();
+                boundClearLocalStorage();
               });
             }
           }.bind(this), 250);
 
           $(window).on('beforeunload', function() {
             boundLockOnClose();
+            boundClearLocalStorage();
           });
         },
         lockOnClose: function() {
@@ -302,10 +321,12 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                          'click here to enable read-only mode.'
         },
         lockOwner: null,
+        lockPk: null,
         currentUser: null,
         refreshTimeout: null,
         lockingSupport: true,  // false for changelist views and new objects
         isReadonly: false,
+        didFirstPoll: false,
         refreshLock: function() {
             if (this.isReadonly || !this.urls.lock) {
                 return;
@@ -322,10 +343,31 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                         self.currentUser = data.current_user;
                     }
                     if (!data.applies) {
-                        self.enableForm();
+                      if (localStorage) {
+                        var locLockInfo = localStorage.getItem(self.localStorageKey);
+
+                        if (locLockInfo) {
+                          var currLockObj = JSON.parse(locLockInfo);
+                          var currLockVal = currLockObj[data.lock_pk];
+
+                          if (currLockVal && currLockVal === true && !self.didFirstPoll) {
+                            self.disableForm(data);
+                          } else {
+                            currLockObj[data.lock_pk] = true;
+                            localStorage.setItem(self.localStorageKey, JSON.stringify(currLockObj));
+                            self.enableForm();
+                          }
+                        } else {
+                          var newLockObj = {};
+                          newLockObj[data.lock_pk] = true;
+                          localStorage.setItem(self.localStorageKey, JSON.stringify(newLockObj));
+                          self.enableForm();
+                        }
+                      }
                     } else {
                         self.disableForm(data);
                     }
+                    self.lockPk = data.lock_pk;
                     self.lockOwner = data.locked_by;
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -355,6 +397,9 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
                     }
                     if (!self.lockingSupport) {
                         return;
+                    }
+                    if (!self.didFirstPoll) {
+                      self.didFirstPoll = true;
                     }
                     self.refreshTimeout = setTimeout(function() { self.refreshLock(); }, 30000);
                 }
