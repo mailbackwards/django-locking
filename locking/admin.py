@@ -136,7 +136,7 @@ class LockableAdminMixin(object):
             except Lock.DoesNotExist:
                 pass
             else:
-                if lock.is_locked and lock.is_locked_by(request.user):
+                if lock.is_locked and lock.is_locked_by(request.user) and not 'keep_lock' in request.GET:
                     lock.unlock_for(request.user)
         super(LockableAdminMixin, self).save_model(request, obj, *args, **kwargs)
 
