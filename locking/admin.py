@@ -115,6 +115,11 @@ class LockableAdminMixin(object):
     def render_change_form(self, request, context, add=False, obj=None, **kwargs):
         if not add and getattr(obj, 'pk', None):
             locking_media = self.locking_media(obj)
+            # This makes basestring work for both py2 and py3, inspired by requests/compat.py
+            try:
+                basestring
+            except NameError:
+                basestring = (str, bytes)
             if isinstance(context['media'], basestring):
                 locking_media = unicode(locking_media)
             context['media'] += locking_media
