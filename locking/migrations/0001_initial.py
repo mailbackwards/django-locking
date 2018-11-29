@@ -18,9 +18,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('object_id', models.PositiveIntegerField()),
-                ('_locked_at', models.DateTimeField(null=True, editable=False, db_column=b'locked_at')),
-                ('_hard_lock', models.BooleanField(default=False, editable=False, db_column=b'hard_lock')),
-                ('_locked_by', models.ForeignKey(related_name='working_on_locking_lock', db_column=b'locked_by', editable=False, to=settings.AUTH_USER_MODEL, null=True)),
+                ('_locked_at', models.DateTimeField(null=True, editable=False, db_column='locked_at')),
+                ('_hard_lock', models.BooleanField(default=False, editable=False, db_column='hard_lock')),
+                ('_locked_by', models.ForeignKey(related_name='working_on_locking_lock', db_column='locked_by', editable=False, to=settings.AUTH_USER_MODEL, null=True)),
                 ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
             ],
             options={
