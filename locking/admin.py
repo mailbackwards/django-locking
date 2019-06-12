@@ -8,7 +8,7 @@ except ImportError:
 
 import django
 from django import forms
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import html as html_utils
 from django.utils.functional import curry
 from django.utils.translation import ugettext as _
