@@ -13,6 +13,7 @@ from django.utils import html as html_utils
 from django.utils.functional import curry
 from django.utils.translation import ugettext as _
 from django.utils.decorators import method_decorator
+from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.admin.templatetags.admin_static import static as admin_static
 
@@ -174,14 +175,14 @@ class LockableAdminMixin(object):
         try:
             lock = Lock.objects.get_lock_for_object(obj)
         except Lock.DoesNotExist:
-            return u""
+            return ""
         else:
             if not lock.is_locked:
-                return u""
+                return ""
 
         locked_by_name = lock.locked_by.get_full_name()
         if locked_by_name:
-            locked_by_name = u"%(username)s (%(fullname)s)" % {
+            locked_by_name = "%(username)s (%(fullname)s)" % {
                 'username': lock.locked_by.username,
                 'fullname': locked_by_name,
             }
@@ -189,24 +190,24 @@ class LockableAdminMixin(object):
             locked_by_name = lock.locked_by.username
 
         if lock.locked_by.pk == current_user_id:
-            msg = _(u'You own this lock. Close out of the item to unlock it')
+            msg = _('You own this lock. Close out of the item to unlock it')
             character = '&#x270D;'
         else:
-            msg = _(u'Locked by %s. Click here to force it to unlock' % locked_by_name)
+            msg = _('Locked by %s. Click here to force it to unlock' % locked_by_name)
             character = '&#128274;'
 
-        return (
-            u'  <a href="#" title="%(msg)s"'
-            u'     data-locked-obj-id="%(locked_obj_id)s"'
-            u'     data-locked-by="%(locked_by_name)s"'
-            u'     class="locking-status">%(character)s</a>'
+        markup = (
+            '  <a href="#" title="%(msg)s"'
+            '     data-locked-obj-id="%(locked_obj_id)s"'
+            '     data-locked-by="%(locked_by_name)s"'
+            '     class="locking-status">%(character)s</a>'
         ) % {
             'msg': html_utils.escape(msg),
             'locked_obj_id': obj.pk,
             'locked_by_name': html_utils.escape(locked_by_name),
-            'character': character,}
+            'character': character}
+        return mark_safe(markup)
 
-    get_lock_for_admin.allow_tags = True
     get_lock_for_admin.short_description = 'Lock'
 
 
