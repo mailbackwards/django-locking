@@ -39,7 +39,6 @@ class LockableAdminMixin(object):
     def media(self):
         return super(LockableAdminMixin, self).media + forms.Media(**{
             'js': (
-                admin_static('admin/js/jquery.init.js'),
                 admin_static('locking/js/admin.locking.js'),
             ),
             'css': {
