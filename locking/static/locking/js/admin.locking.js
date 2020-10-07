@@ -247,7 +247,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
 
             this.toggleEditorReadonly(false);
 
-            if (typeof $.fn.select2 === "function") {
+            if (typeof $.fn.select2 === "function" && $('.django-select2').data('select2')) {
                 $('.django-select2').select2("enable", true);
             }
             $(document).trigger('locking:enabled');
@@ -282,7 +282,7 @@ var DJANGO_LOCKING = DJANGO_LOCKING || {};
 
             this.toggleEditorReadonly(true);
 
-            if (typeof $.fn.select2 === "function") {
+            if (typeof $.fn.select2 === "function" && $('.django-select2').data('select2')) {
                 $('.django-select2').select2("enable", false);
             }
             $(document).trigger('locking:disabled');
