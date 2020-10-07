@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 README = os.path.join(os.path.dirname(__file__), 'README.md')
 long_description = open(README).read()
 setup(name='django-locking',
-      version='2.2.19.dev15',
+      version='2.2.19.dev16',
       description=("Prevents users from doing concurrent editing in Django. Works out of the box in the admin interface, or you can integrate it with your own apps using a public API."),
       long_description=long_description,
       classifiers=['Development Status :: 4 - Beta',
