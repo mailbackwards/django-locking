@@ -8,6 +8,7 @@ except ImportError:
 
 import django
 from django import forms
+from django.db.models import Value, IntegerField
 from django.urls import reverse
 from django.utils import html as html_utils
 from django.utils.functional import curry
@@ -157,9 +158,7 @@ class LockableAdminMixin(object):
             qs = super(LockableAdminMixin, self).queryset(request)
         else:
             qs = super(LockableAdminMixin, self).get_queryset(request)
-        return qs.extra(select={
-            '_locking_user_pk': "%d" % request.user.pk,
-        })
+        return qs.annotate(_locking_user_pk=Value(request.user.pk, output_field=IntegerField()))
 
     if django.VERSION < (1, 7):
         queryset = get_queryset
